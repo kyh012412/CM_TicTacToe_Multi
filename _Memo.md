@@ -105,3 +105,13 @@ Universal 2D 템플릿에서 진행
 4. 테스트
    1. Spawn은 정상적이였지만
    2. 위치가 동기화가 되지 않았다.
+
+### Network Transform
+
+1. 위치를 동기화하고싶다면 객체내에 Network Transform이 있어야한다.
+2. Prefab Cross와 Circle에 Network Transform컴포넌트를 추가해준다.
+   1. 컴포넌트 내부에 보면 동기화하고싶은것을 설정해줄수있는 체크박스들이있는데
+   2. 이 이유는 네트워크는 대역폭의 문제라서 필요한만큼만 동기화할수있도록 설정할수있게 만들어준것이다.
+   3. 현재는 비용의 최소를 위해 Position x,y만 체크해주고 전부 해제해준다.
+3. 코드상에서 Spawn위치를 바로 지정해준다. (코드변경)
+4. `Transform spawnedCrossTransform = Instantiate(crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);`
