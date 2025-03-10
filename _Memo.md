@@ -65,3 +65,34 @@ Universal 2D 템플릿에서 진행
 1. GameManager.cs 를 만들어 준다.
 2. 싱글톤으로 만들어준뒤
 3. 버튼이 눌렸을때 작동할 메서드를 만들어준뒤 GridPosition에서 호출을 해본다.
+
+### Game Visual Manager, Spawn Objects
+
+1. 새로운 빈객체 Cross를 만들어준다.
+2. 논리와 형상을 분리해준다.
+3. 부모객체가 논리를갖고 형상을 자식이 갖도록해서 분리해준다.
+4. Cross 이하에 자식 객체를 추가한다.(Sprite)
+   1. Sprite의 Sprite Renderer를 조정해준다.
+   2. Sprite의 Scale을 2.6 2.6 1로 조정해준다.
+5. Cross를 Prefab화 해준다.
+   1. 복사하여 Cricle도 만들어준다.
+6. GameVisualManager 를 만들어준다.
+   1. Prefab들을 연결
+7. GameManger에서 이벤트 정의
+   1. invoke를 감싸는 메서드도 정의
+   2. 타 클래스에서 해당 메서드 호출
+   3. 해당 이벤트에 GameVisualManager클래스 내에서도 기능 연결
+      1. 좌표를 받아와 올바른 Prefabs를 instantiate 해준다.
+8. 테스트
+   1. 로컬 정상
+   2. 네트워크 동기화 x
+9. Cross와 Circle에 NetworkObject 컴포넌트를 추가해준다.
+10. 코드상에서 네트워크에 소환하는 코드
+    ```cs
+        private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs e) {
+            Transform spawnedCrossTransform = Instantiate(crossPrefab);
+            spawnedCrossTransform.GetComponent<NetworkObject>().Spawn(true);
+            spawnedCrossTransform.position = GetGridWorldPosition(e.x, e.y);
+        }
+    ```
+11. 다만 client는 spawn을 할 수 없으므로 rpc를 이용한다.
