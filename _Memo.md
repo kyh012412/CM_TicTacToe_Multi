@@ -96,3 +96,12 @@ Universal 2D 템플릿에서 진행
         }
     ```
 11. 다만 client는 spawn을 할 수 없으므로 rpc를 이용한다.
+
+### RPCs
+
+1. `[Rpc(SendTo.Server)]`를써서 서버로 rpc를 보내려고하고
+2. `MonoBehaviour` 대신에 `NetworkBehaviour`를써줘야 rpc를 쓸수있다.
+3. `NetworkBehaviour`를 사용한 객체에서는 `NetworkObject` 컴포넌트도 넣어줘야한다.
+4. 테스트
+   1. Spawn은 정상적이였지만
+   2. 위치가 동기화가 되지 않았다.
