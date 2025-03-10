@@ -115,3 +115,37 @@ Universal 2D 템플릿에서 진행
    3. 현재는 비용의 최소를 위해 Position x,y만 체크해주고 전부 해제해준다.
 3. 코드상에서 Spawn위치를 바로 지정해준다. (코드변경)
 4. `Transform spawnedCrossTransform = Instantiate(crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);`
+
+### Player Types, LocalClientId
+
+1. GameManager내에 PlayerType인 enum을 정의
+2. PlayerType자료형의 값을 가질 변수 localPlayerType을정의
+3. GameManager를 NetworkBehaviour로 변경
+   1. Network Object 추가
+   2. OnNetworkSpawn메서드를 Override해준다.
+4. NetworkManager내의 singleton에 접근해서
+   1. 그 내부에 있는 LocalClientId를 사용한다.
+   ```cs
+       public override void OnNetworkSpawn() {
+           Debug.Log("OnNetworkSpawn - NetworkManager.Singleton.LocalClientId : " + NetworkManager.Singleton.LocalClientId);
+       }
+   ```
+5. 여기 까지 만든 후 테스트.
+   1. 호스트는 호스트 개설시 0번으로
+   2. 클라이언트는 start client시 1번으로 동작하는것을 확인
+   3. 해당 메서드는 serverRpc이기때문에 client가 요청해도 Server에서 serverRpc가 실행되어 Server의 localPlayerType을갖기에 원하는 문양을 얻을 수 없다.
+   4. 매개변수로 Prefab를 주면될수도 있지만 ServerRpc에 매개변수로
+      1. Object나 Transform에 해당하는 자료형들을 보낼수없다.
+      2. NetworkObject도 불가
+      3. 꼭 필요하다면 NetworkObjectReference로 가능하다.
+         1. 태생이 Struct이기에 가능하다.
+      4. 대신에 Enum은 가능하다.
+6. 테스트 -
+   1. 구현한 만큼은 정상
+   2. 한 명이 무제한의 턴을 가질수있음
+   3. 턴의 처리에 해당하는 구현이 필요
+7. enum의 첫값은 관용적으로 None이나 Null을 쓴다.
+8. 현재 플레이할 사람을 담을 변수와
+   1. `PlayerType currentPlayablePlayerType`
+   2. 이 변수를 연결되었을때 서버에서만기준으로 초기화
+   3. 조건부 분기처리
