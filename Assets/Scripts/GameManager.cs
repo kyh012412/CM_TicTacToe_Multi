@@ -13,6 +13,9 @@ public class GameManager : NetworkBehaviour {
         public PlayerType playerType;
     }
 
+    public event EventHandler OnGameStarted;
+    public event EventHandler OnCurrentPlayablePlayerTypeChanged;
+
     public enum PlayerType {
         None,
         Cross,
@@ -30,7 +33,7 @@ public class GameManager : NetworkBehaviour {
         Instance = this;
     }
 
-    public override void OnNetworkSpawn() {
+    public override void OnNetworkSpawn() { // 네트워크에 연결됬을때 자동으로 0,1,2,3의 값을 차례로 받음
         // Debug.Log("OnNetworkSpawn - NetworkManager.Singleton.LocalClientId : " + NetworkManager.Singleton.LocalClientId);
 
         if (NetworkManager.Singleton.LocalClientId == 0) {
@@ -40,8 +43,21 @@ public class GameManager : NetworkBehaviour {
         }
 
         if (IsServer) {
-            currentPlayablePlayerType = PlayerType.Cross; // 크로스가 선
+            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
         }
+    }
+
+    private void NetworkManager_OnClientConnectedCallback(ulong obj) { // obj는 클라이언트식별 아이디에 해당하는 값
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == 2) {
+            // Start Game
+            currentPlayablePlayerType = PlayerType.Cross; // 크로스가 선
+            TriggerOnGameStartedRpc();
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameStartedRpc() {
+        OnGameStarted?.Invoke(this, EventArgs.Empty);
     }
 
     [Rpc(SendTo.Server)]
@@ -66,9 +82,19 @@ public class GameManager : NetworkBehaviour {
                 currentPlayablePlayerType = PlayerType.Cross;
                 break;
         }
+        triggerOnCurrentPlayablePlayerTypeChangedRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void triggerOnCurrentPlayablePlayerTypeChangedRpc() {
+        OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public PlayerType GetLocalPlayerType() {
         return localPlayerType;
+    }
+
+    public PlayerType GetCurrentPlayablePlayerType() {
+        return currentPlayablePlayerType;
     }
 }

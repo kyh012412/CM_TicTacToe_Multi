@@ -149,3 +149,43 @@ Universal 2D 템플릿에서 진행
    1. `PlayerType currentPlayablePlayerType`
    2. 이 변수를 연결되었을때 서버에서만기준으로 초기화
    3. 조건부 분기처리
+
+### Player UI
+
+9. UI를 위해 캔버스 생성
+10. 캔버스 이하에 빈객체 생성 PlayerUI
+    1. 전체 크기
+11. PlayerUI 이하에 Image 생성 (CrossImage)
+    1. 위치 12시 pos x 50 y -5
+    2. 크기 100 100
+    3. 스프라이트 Cross
+12. 복사해서 대칭위치해 Circle을 만들어주기(CircleImage)
+13. PlayerUI이하에 새로운 Image추가
+    1. Image컴포넌트내에 sprite none
+    2. background color black
+       1. 크기 480 150
+14. (하이라키내에) 배치순서에 따른 렌더링 순서가 생기니 올바른 위치에 잘 놓아준다.
+15. 기존 Main Camera
+    1. position y를 0.6 해준다.
+    2. Projection size 6
+16. 기존 Background (캔버스내부가 아닌)의 Scale을 17 22로 변경
+17. PlayerUI내에 Text 추가 ( Mesh Pro) (CrossYouTextMesh)
+    1. 라벨 YOU
+    2. 가로 세로 0 0
+    3. 중앙정렬 중앙정렬
+    4. NO WRAP
+    5. pos x 50 y -120
+    6. 대칭으로 하나 더 만들어준다. (pos x -50자리에) (CircleYouTextMesh)
+18. PlayerUI내에 Image 추가 (CircleArrowImage)
+    1. sprite arrow
+    2. Pos X -150
+19. 대칭으로 하나더 만들어 준다. (CrossArrowImage)
+    1. Pos X 150
+    2. rotation z 180
+20. PlayerUI Script를 만들어 준다.
+21. GameManger에 이벤트를 만들어준다.
+    1. `public event EventHandler OnGameStarted;`
+    2. `public event EventHandler OnCurrentPlayablePlayerTypeChanged;`
+22. 서버에서만 실행되지않고 모두에게 실행되어야하는 부분을 다른 메서드로 뽑아주며
+    1. `[Rpc(SendTo.ClientsAndHost)]`를 붙여서 사용해준다.
+    2. Rpc속성을 사용한 메서드는 Rpc로 끝나야한다. (명명규칙)
