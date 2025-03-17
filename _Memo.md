@@ -189,3 +189,24 @@ Universal 2D 템플릿에서 진행
 22. 서버에서만 실행되지않고 모두에게 실행되어야하는 부분을 다른 메서드로 뽑아주며
     1. `[Rpc(SendTo.ClientsAndHost)]`를 붙여서 사용해준다.
     2. Rpc속성을 사용한 메서드는 Rpc로 끝나야한다. (명명규칙)
+
+### Network Variable
+
+1. `currentPlayablePlayerType`을 네트워크 변수로 만들어 효율적으로 모두 동일한 값을 가지게 한다.
+   1. 효율적이지않게 값을 변경할때마다 rpc를 보내서 같은 값을 가지게 할수도있기는 하다.
+   2. Network Variable 자동으로 동기화되므로 사용하기 편하다.
+2. EX)
+   1. `PlayerType`인 자료형을 Network Variable로 사용하려면 `NetworkVariable<PlayerType>`로 사용해주면 된다.
+3. _`NetworkVariable`는 선언할때 값을 주어야만한다._ (의무,중요)
+4. `private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>(초기값,읽을수있는대상,쓰기가능한대상);`
+   1. 으로 써준다.
+   2. `private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>(PlayerType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);`
+   3. 기본값이 있으므로 `private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();`까지만 써주어도 된다.
+5. `currentPlayablePlayerType`의 값을 사용할때는 `currentPlayablePlayerType.Value`를 사용한다.
+6. `currentPlayablePlayerType`값이 서버에서 바뀌면 자동으로 값을 동기화함
+7. Host또는 서버에서만 값을 바꿔주면됨
+8. `OnNetworkSpawn` 내에서 `currentPlayablePlayerType.OnValueChanged`에 해당하는 메서드 추가
+   1. 기존의 `OnCurrentPlayablePlayerTypeChanged`를 invoke시켜주는것을 연결
+9. 테스트 - 정상
+   1. 서버측에서 값을바꾸면 자동으로 동기화가되고
+   2. 각자의 로컬에서 `OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);`가 적용되어 다음 상황까지 동일하게 연결
