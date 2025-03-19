@@ -240,3 +240,36 @@ Universal 2D 템플릿에서 진행
    2. OX invoke 발생전 배열내의 좌표값이 None이 아니면 return을 발생
    3. 정상처리시 해당 배열에 값 부여코드를 추가해준다.
 2. 테스트
+
+### Test Winner Function
+
+1. GameManger 내에 TestWinner funciton을 만들어준다.
+2. 정상적인 OX처리후 TestWinner를 호출
+3. 하이라키에 LineComplete객체를 만들어주고 LineGreen 소스를 사용한다.
+   1. order의 값을 올려줘서 다른객체를 덮을수있게 해준다.
+   2. 네트워크 오브젝트 컴포넌트를 추가해준다.
+   3. 위치도 동기화하기 위해서 Network Transform도 추가해준다.
+      1. 싱크는 Position x,y / Rotation z만 필요하다.
+      2. (나머지는) 체크 해제
+   4. 이것을 Prefab화 해준다.
+4. 위 Prefab을 GameVisualManager에 연결해준다.
+5. GameManager에 새로운 이벤트 핸들러 추가
+   1. OnGameWin
+      1. 누군가 이겼을때 invoke
+      2. 매개변수로 누가 이겼는지 알수있게 매개변수 추가
+         1. 중앙 좌표 `public Vector2Int centerGridPosition;`
+6. GameVisualManager에서 OnGameWin에 액션 추가
+   1. 좌표를 받아서 월드 포지션으로 변경후 그곳에 Instantiate한후
+   2. NetworkObject를 가져와서 한번더 Spawn해준다.
+7. GameManager 단에서 새로운 것을 정의
+8. 읽기전용인 데이터 컨테이너에서는 주로 Strcut를 사용한다.(Class 보다)
+   1. `public struct Line`을 만든다.
+      1. 멤버 변수로는 `List<Vector2Int>`로 좌표들을 갖는 변수와
+      2. 라인의 중점을 나타내는 `Vector2Int` 자료형인 변수 이렇게 2개이다.
+9. 일부 코드를 Line으로 리팩토링해준다.
+10. 가능한 Line들을 모아놓은 변수를 GameManager단에서 만들어준다.
+11. 테스트
+    1. 선의 기울기 조정이 필요
+12. 새로운 enum 생성 Orientation
+    1. LIne 내에도 변수추가
+    2. Visual Manager단에서 Switch를 통한 분기처리

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -15,6 +16,10 @@ public class GameManager : NetworkBehaviour {
     }
 
     public event EventHandler OnGameStarted;
+    public event EventHandler<OnGameWinEventArgs> OnGameWin;
+    public class OnGameWinEventArgs : EventArgs {
+        public Line line;
+    }
     public event EventHandler OnCurrentPlayablePlayerTypeChanged;
 
     public enum PlayerType {
@@ -23,9 +28,23 @@ public class GameManager : NetworkBehaviour {
         Circle,
     };
 
+    public enum Orientation {
+        Horizontal,
+        Vertical,
+        DiagonalA, // 좌하단 to 우상단
+        DiagonalB, // 좌상단 to 우하단
+    }
+
+    public struct Line {
+        public List<Vector2Int> gridVector2IntList; // 라인을 구성하는 승리 좌표 3개
+        public Vector2Int centerGridPosition;
+        public Orientation orientation;
+    }
+
     private PlayerType localPlayerType;
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
     private PlayerType[,] playerTypesArray;
+    private List<Line> lineList;
 
 
     private void Awake() {
@@ -35,6 +54,69 @@ public class GameManager : NetworkBehaviour {
         Instance = this;
 
         playerTypesArray = new PlayerType[3, 3];
+        lineList = new List<Line> {
+            // Horizontal
+            new Line{ // 바닥 라인
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,0),new Vector2Int(1,0),new Vector2Int(2,0),
+                },
+                centerGridPosition = new Vector2Int(1,0),
+                orientation = Orientation.Horizontal,
+            },
+            new Line{ // 중간 라인 (가로)
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,1),new Vector2Int(1,1),new Vector2Int(2,1),
+                },
+                centerGridPosition = new Vector2Int(1,1),
+                orientation = Orientation.Horizontal,
+            },
+            new Line{ // 상단 라인
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,2),new Vector2Int(1,2),new Vector2Int(2,2),
+                },
+                centerGridPosition = new Vector2Int(1,2),
+                orientation = Orientation.Horizontal,
+            },
+
+            // Vertical
+            new Line{ // 좌측 라인
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,0),new Vector2Int(0,1),new Vector2Int(0,2),
+                },
+                centerGridPosition = new Vector2Int(0,1),
+                orientation = Orientation.Vertical,
+            },
+            new Line{ // 중간 라인 (세로)
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(1,0),new Vector2Int(1,1),new Vector2Int(1,2),
+                },
+                centerGridPosition = new Vector2Int(1,1),
+                orientation = Orientation.Vertical,
+            },
+            new Line{ // 우측 라인
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(2,0),new Vector2Int(2,1),new Vector2Int(2,2),
+                },
+                centerGridPosition = new Vector2Int(2,1),
+                orientation = Orientation.Vertical,
+            },
+
+            // Diagonals
+            new Line{ // 좌하단 to 우상단
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,0),new Vector2Int(1,1),new Vector2Int(2,2),
+                },
+                centerGridPosition = new Vector2Int(1,1),
+                orientation = Orientation.DiagonalA,
+            },
+            new Line{ // 좌상단 to 우하단
+                gridVector2IntList = new List<Vector2Int>{
+                    new Vector2Int(0,2),new Vector2Int(1,1),new Vector2Int(2,0),
+                },
+                centerGridPosition = new Vector2Int(1,1),
+                orientation = Orientation.DiagonalB,
+            },
+        };
     }
 
     public override void OnNetworkSpawn() { // 네트워크에 연결됬을때 자동으로 0,1,2,3의 값을 차례로 받음
@@ -98,6 +180,36 @@ public class GameManager : NetworkBehaviour {
             case PlayerType.Circle:
                 currentPlayablePlayerType.Value = PlayerType.Cross;
                 break;
+        }
+
+        TestWinner(); // 해당 메서드가 Server 내에서 호출되기 때문에 서버에서만 작동됨
+    }
+
+    private bool TestWinnerLine(Line line) {
+        return TestWinnerLine(
+            playerTypesArray[line.gridVector2IntList[0].x, line.gridVector2IntList[0].y],
+            playerTypesArray[line.gridVector2IntList[1].x, line.gridVector2IntList[1].y],
+            playerTypesArray[line.gridVector2IntList[2].x, line.gridVector2IntList[2].y]
+            );
+    }
+
+    private bool TestWinnerLine(PlayerType aPlayerType, PlayerType bPlayerType, PlayerType cPlayerType) {
+        return aPlayerType != PlayerType.None &&
+        aPlayerType == bPlayerType &&
+        bPlayerType == cPlayerType;
+    }
+
+    private void TestWinner() {
+        foreach (Line line in lineList) {
+            if (TestWinnerLine(line)) {
+                // Win !
+                Debug.Log("Winner!");
+                currentPlayablePlayerType.Value = PlayerType.None;
+                OnGameWin?.Invoke(this, new OnGameWinEventArgs {
+                    line = line,
+                });
+                break;
+            }
         }
     }
 
