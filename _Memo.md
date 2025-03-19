@@ -210,3 +210,25 @@ Universal 2D 템플릿에서 진행
 9. 테스트 - 정상
    1. 서버측에서 값을바꾸면 자동으로 동기화가되고
    2. 각자의 로컬에서 `OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);`가 적용되어 다음 상황까지 동일하게 연결
+
+### Network Manager UI
+
+1. Network Manager UI를 canvas이하에 만들어준다.
+   1. 앵커 전체
+2. NetworkManagerUI이하에 Image추가 (StartHostButton)
+   1. 텍스트 라벨 HOST
+   2. 배경과 폰트색 조정
+   3. 버튼 크기 조정
+   4. 폰트크기 65
+3. 복사해서 클라이언트관련쪽도만들어주기
+4. NetworkManagerUI 이하에 Image 만들기 (Background)
+   1. Background를 첫번째 자식으로 만들어주기
+   2. 앵커 최대
+   3. 검정색 + 알파값 조금낮추기 (200)
+5. NetworkManagerUI 생성 및 부착
+   1. 버튼연결
+   2. 버튼에 기능연결
+   3. 버튼 눌릴시 UI 비활성화
+6. 테스트 - 정상
+   1. 새로운 문제
+      1. 이미 OX가 결정된 곳에 중복으로 다른 XO를 넣을 수 있다.
