@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManager : NetworkBehaviour {
     public static GameManager Instance { get; private set; }
 
+
     public event EventHandler<OnClickedOnGridPositionEventArgs> OnClickedOnGridPosition;
 
     public class OnClickedOnGridPositionEventArgs : EventArgs {
@@ -24,6 +25,7 @@ public class GameManager : NetworkBehaviour {
 
     private PlayerType localPlayerType;
     private NetworkVariable<PlayerType> currentPlayablePlayerType = new NetworkVariable<PlayerType>();
+    private PlayerType[,] playerTypesArray;
 
 
     private void Awake() {
@@ -31,6 +33,8 @@ public class GameManager : NetworkBehaviour {
             Debug.LogError("More thane One GameManager instance!");
         }
         Instance = this;
+
+        playerTypesArray = new PlayerType[3, 3];
     }
 
     public override void OnNetworkSpawn() { // 네트워크에 연결됬을때 자동으로 0,1,2,3의 값을 차례로 받음
@@ -72,6 +76,13 @@ public class GameManager : NetworkBehaviour {
         if (playerType != currentPlayablePlayerType.Value) {
             return;
         }
+
+        if (playerTypesArray[x, y] != PlayerType.None) {
+            // Already occupied
+            return;
+        }
+
+        playerTypesArray[x, y] = playerType;
 
         OnClickedOnGridPosition?.Invoke(this, new OnClickedOnGridPositionEventArgs {
             x = x,
