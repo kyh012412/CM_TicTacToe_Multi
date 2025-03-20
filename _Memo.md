@@ -273,3 +273,59 @@ Universal 2D 템플릿에서 진행
 12. 새로운 enum 생성 Orientation
     1. LIne 내에도 변수추가
     2. Visual Manager단에서 Switch를 통한 분기처리
+
+### Game Over UI
+
+1. Canvas이하에 빈 객체 생성(Game Over UI)
+   1. 앵커 전체
+2. Game Over UI 이하에 Text추가
+   1. 라벨 YOU WIN!
+   2. 올바른 background 추가해준후
+   3. 우상단에 기울여서 위치
+3. GameOverUI cs 제작
+   1. result Text Mesh를 연결
+   2. win color와 lose color 변수 생성
+   3. GameManger에 OnGameWin에 이어서 액션 구현
+   4. 조건 분기처리후 Show()
+4. 테스트 -
+   1. 클라이언트에서 정상적인 UI가 보여지지않음
+   2. 이유 -
+      1. Rpc가 서버에서만 작동되어 있기 때문에
+   3. 해결 ClientandHost로 Rpc를 보내어서 해결
+   4. 추가 문제
+      1. Rpc로 Line 자료형을 매개변수로 보낼수없다.
+5. Line 구조체에 INetworkSerializable을 상속 구현해준다.
+
+   ```cs
+       public struct Line : INetworkSerializable {
+           public List<Vector2Int> gridVector2IntList; // 라인을 구성하는 승리 좌표 3개
+           public Vector2Int centerGridPosition;
+           public Orientation orientation;
+
+           public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
+   			serializer.SerializeValue(ref gridVector2IntList); // 이부분에서 에러가 발생함 이유는 Nullable은 지원하지 않기때문에
+               serializer.SerializeValue(ref centerGridPosition);
+               serializer.SerializeValue(ref orientation);
+           }
+       }
+   ```
+
+6. 다른 방법을 사용해서 공유하는 리스트가 있으므로 index (int)를 매개변수로 처리해준다.
+   1. 이렇게 하면 대역폭과 많은 돈을 아낄 수있다.
+   ```cs
+   	[Rpc(SendTo.ClientsAndHost)]
+       private void TriggerOnGameWinRpc(int lineIndex) {
+           Line line = lineList[lineIndex];
+           OnGameWin?.Invoke(this, new OnGameWinEventArgs {
+               line = line,
+               winPlayerType = playerTypesArray[line.centerGridPosition.x, line.centerGridPosition.y],
+           });
+       }
+   ```
+7. 위 부분에서 playerTypesArray에 올바른 값은 가진건 서버뿐이다.
+   1. 나머지Client들은 PlayerType.None을 가지고있으므로
+   2. server단에서 조회후 반환된 값을 Rpc 호출 매개변수로 넘겨준다.
+8. VisualManager에서
+   1. GameManager_OnGameWin가 호출될때
+      1. 서버가아니면 return으로 종료해준다.
+      2. (서버에서 필요한 Network Object를 spawn후 동기화되어서 생기게된다.)

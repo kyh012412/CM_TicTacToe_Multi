@@ -15,6 +15,10 @@ public class GameVisualManager : NetworkBehaviour {
     }
 
     private void GameManager_OnGameWin(object sender, GameManager.OnGameWinEventArgs e) {
+        if (!NetworkManager.Singleton.IsServer) {
+            return;
+        }
+
         float eulerZ = 0f;
         switch (e.line.orientation) {
             default:
@@ -34,7 +38,6 @@ public class GameVisualManager : NetworkBehaviour {
         Transform lineCompleteTransform =
         Instantiate(lineCompletePrefab, GetGridWorldPosition(e.line.centerGridPosition.x, e.line.centerGridPosition.y), Quaternion.Euler(0, 0, eulerZ));
         lineCompleteTransform.GetComponent<NetworkObject>().Spawn(true);
-
     }
 
     private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs e) {
