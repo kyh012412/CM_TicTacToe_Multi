@@ -22,6 +22,7 @@ public class GameManager : NetworkBehaviour {
         public PlayerType winPlayerType;
     }
     public event EventHandler OnCurrentPlayablePlayerTypeChanged;
+    public event EventHandler OnRematch;
 
     public enum PlayerType {
         None,
@@ -227,5 +228,23 @@ public class GameManager : NetworkBehaviour {
 
     public PlayerType GetCurrentPlayablePlayerType() {
         return currentPlayablePlayerType.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void RematchRpc() {
+        for (int x = 0; x < playerTypesArray.GetLength(0); x++) {
+            for (int y = 0; y < playerTypesArray.GetLength(1); y++) {
+                playerTypesArray[x, y] = PlayerType.None;
+            }
+        }
+
+        currentPlayablePlayerType.Value = PlayerType.Cross; //랜덤으로하거나 패배자 선으로 할수있다.
+
+        TriggerOnRematchRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void TriggerOnRematchRpc() {
+        OnRematch?.Invoke(this, EventArgs.Empty);
     }
 }

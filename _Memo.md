@@ -329,3 +329,24 @@ Universal 2D 템플릿에서 진행
    1. GameManager_OnGameWin가 호출될때
       1. 서버가아니면 return으로 종료해준다.
       2. (서버에서 필요한 Network Object를 spawn후 동기화되어서 생기게된다.)
+
+### Rematch
+
+1. GameOverUI 이하에 RematchButton 을 만들어 준다.
+2. 스크립트에서 연결
+3. GameManager에서
+   1. Rematch 메서드 생성
+      1. 데이터 배열을 초기화 &
+      2. 다음 플레이어 초기화
+      3. 그리고 Rpc 서버를 붙여준다.
+      4. 이름도 RematchRpc로 변경해준다.
+   2. OnRematch 이벤트를 만들어준다.
+4. GameVisualManager에서
+   1. Rematch 제거할 요소들을 담을
+      1. 변수 visualGameObjectList를 선언후
+      2. 다른 Object를 생성할때마다 visualGameObjectList에 추가해준다.
+5. OnRematch이벤트가 발생시 VisualManager단에서
+   1. visualGameObjectList 내부 요소들을 파괴와 리스트를 Clear해준다.
+6. Rematch시
+   1. gameoverui가 hide되도록설정
+   2. 서버에서는 목록을 삭제해주기
