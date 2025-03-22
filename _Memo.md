@@ -350,3 +350,19 @@ Universal 2D 템플릿에서 진행
 6. Rematch시
    1. gameoverui가 hide되도록설정
    2. 서버에서는 목록을 삭제해주기
+
+### Score
+
+1. 동기화된 스코어점수를 위해서 변수
+   1. 변수를 선언해준다. `NetworkVariable<int>`
+   2. 네트워크 변수 선언시 선언과 동시에 초기화 필요
+2. 각 유저가 승리시 적절한 변수 증가
+3. PlayerUI객체 내부로가서 Text를 만들어준다. ( PlayerCrossScoreTextMesh )
+4. PlayerUI.cs에서 연결
+5. PlayerUI에서 승리 수변수 값을 가져와서 UI에 반영한다.
+6. 테스트
+   1. 네트워크 변수 딜레이로 인하여 정상적인 반영이 안되는상태
+7. 새로운 이벤트 생성
+   1. OnScoreChanged
+8. 변수가 OnChanged 되었을때 OnScoreChanged를 invoke 시켜준다.
+9. PlayerUI에서 OnScoreChanged를 가 되었을때 갱신하도록 코드를 넣어준다.
