@@ -26,6 +26,7 @@ public class GameManager : NetworkBehaviour {
     public event EventHandler OnRematch;
     public event EventHandler OnGameTied;
     public event EventHandler OnScoreChanged;
+    public event EventHandler OnPlacedObject;
 
     public enum PlayerType {
         None,
@@ -177,6 +178,7 @@ public class GameManager : NetworkBehaviour {
         }
 
         playerTypesArray[x, y] = playerType;
+        TriggerOnPlacedObjectRpc();
 
         OnClickedOnGridPosition?.Invoke(this, new OnClickedOnGridPositionEventArgs {
             x = x,
@@ -195,6 +197,11 @@ public class GameManager : NetworkBehaviour {
         }
 
         TestWinner(); // 해당 메서드가 Server 내에서 호출되기 때문에 서버에서만 작동됨
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnPlacedObjectRpc() {
+        OnPlacedObject?.Invoke(this, EventArgs.Empty);
     }
 
     private bool TestWinnerLine(Line line) {

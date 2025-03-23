@@ -366,3 +366,21 @@ Universal 2D 템플릿에서 진행
    1. OnScoreChanged
 8. 변수가 OnChanged 되었을때 OnScoreChanged를 invoke 시켜준다.
 9. PlayerUI에서 OnScoreChanged를 가 되었을때 갱신하도록 코드를 넣어준다.
+
+### Sound Effects and Music
+
+1. PlaceSfx객체를 만들어준다.(하이라키에)
+   1. Audio Source 컴포넌트 추가
+      1. Audio Resource는 PlacingObject로
+      2. Spatial Blend는 2d로
+2. 해당 객체를 Prefab화 해준다.
+3. SoundManager를 만들어 준다.
+   1. prefab을 연결
+4. 상황 발생시 Clientandhost로 Rpc 발생
+   1. 모든 클라이언트가 로컬로 조건 이벤트 발동
+5. 조건 이벤트 감지시
+   1. 필요한 오브젝트를 생성 후 5초뒤 파괴
+6. 승/패도 OnGameWin으로부터 정보를 받아서 분기처리
+   1. 동일한 방법으로 Prefab을 만들어서 연결
+7. 뮤직을 위한 객체와 오디오 소스 컴포넌트를 추가해준다.
+   1. 루프 체크
